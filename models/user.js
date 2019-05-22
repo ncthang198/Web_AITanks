@@ -14,7 +14,6 @@ const User = new Schema({
     },
     dateOfBirth: {
         type: Date,
-        required: true
     },
     studentID: {
         type: Number,

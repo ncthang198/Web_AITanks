@@ -5,6 +5,7 @@ const checkRole = require('../common/checkRole');
 
 router.use('/', require('./object/indexRoute'));
 
+router.use('/setups', require('./object/setupRouter'));
 router.use('/match', require('./object/matchRoute'));
 router.use('/player', require('./object/playerRoute'));
 router.use('/user/bot', checkLogin, checkRole('user'), require('./object/botRoute'));
