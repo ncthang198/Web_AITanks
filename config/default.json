@@ -7,7 +7,7 @@
         "ip": "localhost"
     },
     "liveStream": {
-        "port": "4001"
+        "port": "4000"
     },
     "mongoo": "mongodb://localhost:27017/AIGame",
     "sercret": "4jl4tkuljnk2019",

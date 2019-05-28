@@ -44,7 +44,6 @@ exports.add_post = async (req, res) => {
         status: true,
         hash: await bcrypt.hash(body.userName + body.role + config.get('sercret'), 10)
     });
-    // user.hash = await bcrypt.hash(user.userName + user.role + config.get('sercret'), 10);
 
     user.save()
         .then(result => {

@@ -79,34 +79,61 @@ exports.create_get = async (req, res) => {
 exports.create_post = async (req, res) => {
     if (!req.isAuthenticated()) {
         let body = req.body;
-        let user = new User({
-            userName: body.username,
-            password: await bcrypt.hash(body.password, 10),
-            dateOfBirth: body.birthDate,
-            studentID: body.studentId,
-            email: body.email,
-            firstName: body.firstName,
-            lastName: body.lastName,
-            phoneNumber: body.phone,
-            hash: 'mm'
-        });
-        user.hash = await bcrypt.hash(user.userName + user.role + config.get('sercret'), 10);
-        await user.save();
+        if (body) {
+            var msg = "";
+            const checkMail_Phone = await User.findOne({ $or: [{ studentID: req.body.studentId }, { email: req.body.email }] });
+            if (checkMail_Phone) {
+                msg = 'Mã sinh viên hoặc email đã tồn tại';
+                let article = await Article.find({}).sort({ createTime: -1 }).populate('creator').limit(3).lean();
+                res.render('client/signup', { user: null, article: article, msg: msg });
 
-        let active = new Active({
-            userID: user.id
-        })
+            }
+            else {
+                console.log
+                const checkUserName = await User.findOne({ userName: req.body.username });
+                console.log(checkUserName);
+                if (checkUserName) {
+                    console.log("???")
+                    msg = 'username đã tồn tại';
+                    let article = await Article.find({}).sort({ createTime: -1 }).populate('creator').limit(3).lean();
+                    res.render('client/signup', { user: null, article: article, msg: msg });
+                } else {
+                    let user = new User({
+                        userName: body.username,
+                        password: await bcrypt.hash(body.password, 10),
+                        dateOfBirth: body.birthDate,
+                        studentID: body.studentId,
+                        email: body.email,
+                        firstName: body.firstName,
+                        lastName: body.lastName,
+                        phoneNumber: body.phone,
+                        hash: 'mm'
+                    });
+                    user.hash = await bcrypt.hash(user.userName + user.role + config.get('sercret'), 10);
+                    await user.save();
 
-        await active.save();
+                    let active = new Active({
+                        userID: user.id
+                    })
 
-        let activeLink = req.protocol + '://' + req.headers.host + '/active/' + active.id;
+                    await active.save();
 
-        require('../common/mailer')(user.email, activeLink);
+                    let activeLink = req.protocol + '://' + req.headers.host + '/active/' + active.id;
 
-        console.log('registered user ' + user.id)
+                    require('../common/mailer')(user.email, activeLink);
 
-        let article = await Article.find({}).sort({ createTime: -1 }).populate('creator').limit(3).lean();
-        res.render('client/signup', { user: null, article: article, msg: 'Đăng ký thành công, vui lòng kiểm tra email để kích hoạt tài khoản!' });
+                    console.log('registered user ' + user.id)
+                    msg = 'Đăng ký thành công, vui lòng kiểm tra email để kích hoạt tài khoản!'
+                    let article = await Article.find({}).sort({ createTime: -1 }).populate('creator').limit(3).lean();
+                    res.render('client/signup', { user: null, article: article, msg: msg });
+
+                }
+            }
+
+
+        } else {
+            res.redirect('/');
+        }
 
     } else {
         res.redirect('/');
